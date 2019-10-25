@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/client
 
 import sys
 import json
@@ -8,7 +8,7 @@ import socket
 def get_move(player, board):
     # TODO determine valid moves
     # TODO determine best move
-    return [2, 3]
+    return [2, 4]
 
 
 def prepare_response(move):
