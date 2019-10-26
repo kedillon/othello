@@ -11,6 +11,14 @@ class Move:
     def __str__(self):
         return f"Player {self.player}: [{self.row}, {self.col}]"
 
+    def __repr__(self):
+        return f"Player {self.player}: [{self.row}, {self.col}]"
+
+    def __eq__(self, other):
+        return self.player == other.player and \
+               self.row == other.row and \
+               self.col == other.col
+
 
 class GameState:
     def __init__(self, next_player, board_state):
@@ -22,13 +30,22 @@ class GameState:
         Returns player who won (1 or 2) or None if winner is unknown.
         :return: int: winning player
         """
-        if not self.get_legal_moves(self.next_player):
+        next_player_legal_moves = self.get_legal_moves(self.next_player)
+        other_legal_moves = self.get_legal_moves(other_player(self.next_player))
+
+        # Draw
+        if not next_player_legal_moves and not other_legal_moves:
+            return 0
+        # Other player wins
+        elif not next_player_legal_moves:
             return other_player(self.next_player)
-        elif not self.get_legal_moves(other_player(self.next_player)):
+        # Next player wins
+        elif not other_legal_moves:
             return self.next_player
+        # Winner not known
         return None
 
-    def winner_exists(self):
+    def game_over(self):
         """
         Determine if a winner exists and the game is over.
         :return: bool
@@ -116,7 +133,7 @@ class GameState:
         else:
             return False
 
-    def get_legal_moves(self, player):
+    def get_player_legal_moves(self, player):
         """
         Gets legal moves from this state.
         :return: list: Move objects
@@ -130,3 +147,7 @@ class GameState:
                     valid_moves.append(move)
 
         return valid_moves
+
+    def get_legal_moves(self):
+        return self.get_player_legal_moves(self.next_player)
+
