@@ -31,3 +31,17 @@ def test_move_is_legal():
     assert not game_state.move_is_legal(move6)
     assert not game_state.move_is_legal(move7)
     assert not game_state.move_is_legal(move8)
+
+    game_state = GameState(2, board_state)
+
+    move9 = Move(1, 3, 2)  # Not valid, adjacent to this player, doesn't flip
+    move10 = Move(6, 3, 2)  # Not valid, adjacent to other player but does not flip tiles
+    move11 = Move(6, 2, 2)  # Valid, flips diagonally
+    move12 = Move(2, 2, 2)  # Valid, flips diagonally
+    move13 = Move(4, 2, 2)  # Valid, flips diagonally
+
+    assert not game_state.move_is_legal(move9)
+    assert not game_state.move_is_legal(move10)
+    assert game_state.move_is_legal(move11)
+    assert game_state.move_is_legal(move12)
+    assert game_state.move_is_legal(move13)
