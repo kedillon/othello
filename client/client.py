@@ -4,11 +4,25 @@ import sys
 import json
 import socket
 
+from random import randint
+from lib.montecarlo.game import GameState
+
 
 def get_move(player, board):
     # TODO determine valid moves
     # TODO determine best move
-    return [2, 4]
+
+    game_state = GameState(player, board)
+    legal_moves = game_state.get_legal_moves(player)
+
+    idx = randint(0, len(legal_moves) - 1)
+
+    try:
+        chosen = legal_moves[idx]
+    except:
+        print(f"INDEX: {idx}, NUM_LEGAL: {len(legal_moves)}")
+
+    return [chosen.row, chosen.col]
 
 
 def prepare_response(move):
