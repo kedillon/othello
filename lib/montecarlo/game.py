@@ -22,8 +22,10 @@ class GameState:
         Returns player who won (1 or 2) or None if winner is unknown.
         :return: int: winning player
         """
-        if not self.get_legal_moves():
+        if not self.get_legal_moves(self.next_player):
             return other_player(self.next_player)
+        elif not self.get_legal_moves(other_player(self.next_player)):
+            return self.next_player
         return None
 
     def winner_exists(self):
@@ -39,7 +41,39 @@ class GameState:
         :param action: Move: represents a move
         :return: GameState: updated game state
         """
-        pass
+        if not self.move_is_legal(action):
+            raise Exception("Illegal move")
+            return None
+        new_state = self.board.copy()
+        new_state[action.row][action.col] = action.player
+
+        # Checks that piece was placed by opponent
+        def promising(r, c):
+            if in_bounds(r, c) and self.board[r][c] == other_player(action.player):
+                return True
+            return False
+
+        def flip_in_direction(direction):
+            row, col = increment_row_col(action.row, action.col, direction)
+            if promising(row, col):
+                flips = []
+                while promising(row, col):
+                    flips.append([row, col])
+                    row, col = increment_row_col(row, col, direction)
+                if in_bounds(row, col) and self.board[row][col] == action.player:
+                    for location in flips:
+                        new_state[location[0]][location[1]] = action.player
+
+        flip_in_direction("N")
+        flip_in_direction("S")
+        flip_in_direction("E")
+        flip_in_direction("W")
+        flip_in_direction("NE")
+        flip_in_direction("NW")
+        flip_in_direction("SE")
+        flip_in_direction("SW")
+
+        return GameState(other_player(action.player), new_state)
 
     def move_is_legal(self, action):
         """
@@ -68,6 +102,7 @@ class GameState:
                     return False
                 # We have followed a path of opponent pieces and arrived an another of our pieces
                 return True
+            return False
 
         if legal_move_in_direction("N") or \
                 legal_move_in_direction("S") or \

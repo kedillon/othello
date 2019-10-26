@@ -74,3 +74,34 @@ def test_get_legal_moves():
     assert len(legal_moves) == len(correct)
     for move in correct:
         assert str(move) in [str(legalmove) for legalmove in legal_moves]
+
+
+def test_make_move():
+    board_state = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 0, 0, 1, 2, 0, 0, 0],
+        [0, 0, 0, 1, 2, 2, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+    game_state = GameState(1, board_state)
+
+    move = Move(3, 5, 1)
+    new_state = game_state.move(move)
+
+    correct = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 1, 1, 2, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+    assert new_state.next_player == 2
+    assert new_state.board == correct
