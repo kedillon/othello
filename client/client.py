@@ -3,26 +3,43 @@
 import sys
 import json
 import socket
+import random
+import numpy as np
 
-from random import randint
-from lib.montecarlo.game import GameState
+# from lib.montecarlo.game import GameState
+from mctspy.tree.search import MonteCarloTreeSearch
+from lib.montecarlo_derived.othello import OthelloGameState
+from mctspy.tree.nodes import TwoPlayersGameMonteCarloTreeSearchNode
 
 
 def get_move(player, board):
-    # TODO determine valid moves
-    # TODO determine best move
+    board = np.array(board)
 
-    game_state = GameState(player, board)
-    legal_moves = game_state.get_legal_moves(player)
-
-    idx = randint(0, len(legal_moves) - 1)
+    initial_game_state = OthelloGameState(player, board)
+    root = TwoPlayersGameMonteCarloTreeSearchNode(state=initial_game_state)
+    mcts = MonteCarloTreeSearch(root)
 
     try:
-        chosen = legal_moves[idx]
+        best_node = mcts.best_action(100)
+        new_state = best_node.state
     except:
-        print(f"INDEX: {idx}, NUM_LEGAL: {len(legal_moves)}")
+        print("GETTING RANDOM")
+        random_move = random.choice(mcts.root.state.get_legal_actions())
+        new_state = mcts.root.state.move(random_move)
 
-    return [chosen.row, chosen.col]
+    move = compare_states(initial_game_state, new_state)
+    return [move.row, move.col]
+
+
+def compare_states(old, new):
+    valid_moves = old.get_legal_actions()
+
+    for move in valid_moves:
+        possible_state = old.move(move)
+        if np.array_equal(possible_state.board, new.board):
+            return move
+
+    raise Exception("Invalid moves")
 
 
 def prepare_response(move):
