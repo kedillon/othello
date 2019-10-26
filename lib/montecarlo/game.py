@@ -8,6 +8,9 @@ class Move:
         self.row = row
         self.col = col
 
+    def __str__(self):
+        return f"Player {self.player}: [{self.row}, {self.col}]"
+
 
 class GameState:
     def __init__(self, next_player, board_state):
@@ -19,7 +22,9 @@ class GameState:
         Returns player who won (1 or 2) or None if winner is unknown.
         :return: int: winning player
         """
-        pass
+        if not self.get_legal_moves():
+            return other_player(self.next_player)
+        return None
 
     def winner_exists(self):
         """
@@ -76,10 +81,17 @@ class GameState:
         else:
             return False
 
-    def get_legal_moves(self):
+    def get_legal_moves(self, player):
         """
         Gets legal moves from this state.
         :return: list: Move objects
         """
+        valid_moves = []
 
-        pass
+        for row in range(len(self.board)):
+            for col in range(8):
+                move = Move(row, col, player)
+                if self.move_is_legal(move):
+                    valid_moves.append(move)
+
+        return valid_moves

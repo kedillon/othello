@@ -45,3 +45,32 @@ def test_move_is_legal():
     assert game_state.move_is_legal(move11)
     assert game_state.move_is_legal(move12)
     assert game_state.move_is_legal(move13)
+
+
+def test_get_legal_moves():
+    board_state = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0],
+        [0, 0, 0, 1, 2, 0, 0, 0],
+        [0, 0, 0, 1, 2, 2, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+    game_state = GameState(1, board_state)
+
+    correct = [
+        Move(3, 5, 1),
+        Move(4, 6, 1),
+        Move(1, 5, 1),
+        Move(2, 5, 1),
+        Move(5, 5, 1)
+    ]
+
+    legal_moves = game_state.get_legal_moves(1)
+
+    assert len(legal_moves) == len(correct)
+    for move in correct:
+        assert str(move) in [str(legalmove) for legalmove in legal_moves]
