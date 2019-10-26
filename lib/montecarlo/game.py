@@ -43,9 +43,9 @@ class GameState:
         :return: bool
         """
         # Check that action is in bounds and empty square
-        if self.board[action.row][action.col] != 0:
+        if not in_bounds(action.row, action.col):
             return False
-        if not in_bounds([action.row, action.col]):
+        if self.board[action.row][action.col] != 0:
             return False
 
         # Checks that piece was placed by opponent
@@ -59,8 +59,9 @@ class GameState:
             if promising(row, col):
                 while promising(row, col):
                     row, col = increment_row_col(row, col, direction)
-                if not in_bounds(row, col) or self.board[row][col] != 0:
+                if not in_bounds(row, col) or self.board[row][col] != action.player:
                     return False
+                # We have followed a path of opponent pieces and arrived an another of our pieces
                 return True
 
         if legal_move_in_direction("N") or \

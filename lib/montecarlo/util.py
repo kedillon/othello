@@ -1,7 +1,8 @@
 def in_bounds(row, col):
     """
     Check that location is within an Othello board.
-    :param location: list: Represents a location. Form: [row, col]
+    :param row: int: Represents the row index
+    :param col: int: Represents the column index
     :return: bool
     """
     if row < 0 or row > 7 or col < 0 or col > 7:
