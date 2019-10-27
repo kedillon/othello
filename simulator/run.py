@@ -1,3 +1,4 @@
+from simulator.util import print_board
 from lib.montecarlo.tree import Tree
 from lib.montecarlo.nodes import Node
 from lib.montecarlo.game import GameState, Move
@@ -12,6 +13,8 @@ class Player:
         mcts = Tree(root)
 
         best_node = mcts.best_move(10)
+        if best_node is None:
+            return None
 
         move = best_node.transition_move
         return [move.row, move.col]
@@ -42,14 +45,28 @@ class Simulator:
         while not self.board.game_over():
             if self.turn == 1:
                 move = self.p1.get_move(self.board)
-                self.update_board(move[0], move[1], 1)
-                print(f"Player 1 played at [{move[0]}, {move[1]}]")
-                self.turn = 2
+
+                if move is None:
+                    self.update_board(None, None, 1)
+                    print("Player 1 has no valid moves.")
+                    self.turn = 2
+                else:
+                    self.update_board(move[0], move[1], 1)
+                    print(f"Player 1 played at [{move[0]}, {move[1]}]")
+                    print_board(self.board.board)
+                    self.turn = 2
             else:
                 move = self.p2.get_move(self.board)
-                self.update_board(move[0], move[1], 2)
-                print(f"Player 2 played at [{move[0]}, {move[1]}]")
-                self.turn = 1
+
+                if move is None:
+                    self.update_board(None, None, 1)
+                    print("Player 2 has no valid moves.")
+                    self.turn = 1
+                else:
+                    self.update_board(move[0], move[1], 2)
+                    print(f"Player 2 played at [{move[0]}, {move[1]}]")
+                    print_board(self.board.board)
+                    self.turn = 1
 
         result = self.board.game_result()
         print(f"Winner: Player {result}")

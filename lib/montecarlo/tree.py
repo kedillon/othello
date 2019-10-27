@@ -18,15 +18,19 @@ class Tree:
             # Expand leaf node and select child to rollout.
             child_node = leaf.expand()
 
-            # Rollout
-            simulation_result = child_node.rollout()
+            if child_node:
+                # Rollout
+                simulation_result = child_node.rollout()
 
-            # Backpropogate
-            child_node.backpropagate(simulation_result)
+                # Backpropogate
+                child_node.backpropagate(simulation_result)
 
         sorted_children = sorted(self.root.children,
                                  key=lambda child: child.visit_count,
                                  reverse=True)
+        if not sorted_children:
+            return None
+
         return sorted_children[0]
 
     def select(self):

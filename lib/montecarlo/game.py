@@ -41,16 +41,17 @@ class GameState:
         next_player_legal_moves = self.get_player_legal_moves(self.next_player)
         other_legal_moves = self.get_player_legal_moves(other_player(self.next_player))
 
-        # Draw
+        # Neither player can make moves
         if not next_player_legal_moves and not other_legal_moves:
-            return 0
-        # Other player wins
-        elif not next_player_legal_moves:
-            return other_player(self.next_player)
-        # Next player wins
-        elif not other_legal_moves:
-            return self.next_player
-        # Winner not known
+            total_next = sum(row.count(self.next_player) for row in self.board)
+            total_other = sum(row.count(other_player(self.next_player)) for row in self.board)
+
+            if total_next > total_other:
+                return self.next_player
+            elif total_other > total_next:
+                return other_player(self.next_player)
+            else:
+                return 0
         return None
 
     def game_over(self):
@@ -66,6 +67,11 @@ class GameState:
         :param action: Move: represents a move
         :return: GameState: updated game state
         """
+        # If no move was made by player, copy state and switch player.
+        if action.row is None and action.col is None:
+            new_state = copy.deepcopy(self.board)
+            return GameState(other_player(action.player), new_state)
+
         if not self.move_is_legal(action):
             raise Exception("Illegal move")
             return None

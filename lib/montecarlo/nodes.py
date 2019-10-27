@@ -1,6 +1,7 @@
 import random
 
 import numpy as np
+from lib.montecarlo.game import Move
 from lib.montecarlo.util import other_player
 
 
@@ -70,9 +71,13 @@ class Node:
         """
         # Add 1 to denominator to avoid division by zero
         weights = [
-            (child.win_score / (child.visit_count + 1)) + c * np.sqrt(
+            child.win_score / (child.visit_count + 1) + c * np.sqrt(
                 np.log(self.visit_count) / (child.visit_count + 1)
             )
+            if child.visit_count > 0 else
+
+            c * np.sqrt(np.log(self.visit_count) / (child.visit_count + 1))
+
             for child in self.children
         ]
         return self.children[np.argmax(weights)]
@@ -86,7 +91,10 @@ class Node:
             return self.state.game_result()
 
         legal_moves = self.state.get_legal_moves()
-        random_move = random.choice(legal_moves)
+        if not legal_moves:
+            random_move = Move(None, None, self.state.next_player)
+        else:
+            random_move = random.choice(legal_moves)
         node = Node(self.state.move(random_move))
         return node.rollout()
 
