@@ -17,7 +17,9 @@ def get_move(player, board):
     root = Node(state=initial_game_state)
     mcts = Tree(root)
 
-    best_node = mcts.best_move(10)
+    best_node = mcts.best_move(300)
+    if best_node is None:
+        return None
 
     move = best_node.transition_move
     return [move.row, move.col]
