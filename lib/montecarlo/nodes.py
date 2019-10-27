@@ -23,10 +23,7 @@ class Node:
         self.win_score = 0
 
     def expand(self):
-        """
-        Expand a leaf node and choose a random child to rollout.
-        :return: Node: Represents node to rollout.
-        """
+        """Expand a leaf node and attach children."""
         if self.children:
             raise Exception("Cannot expand an expanded node.")
 
@@ -38,10 +35,16 @@ class Node:
                          transition_move=move)
             self.children.append(child)
 
+    def random_child(self):
+        """
+        Returns a random child of this node, or none if this
+        node has no children.
+        :return: Node
+        """
         if not self.children:
             return None
-
-        return random.choice(self.children)
+        else:
+            return random.choice(self.children)
 
     def backpropagate(self, game_result):
         """

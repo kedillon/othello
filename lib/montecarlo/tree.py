@@ -16,7 +16,8 @@ class Tree:
             leaf = self.select()
 
             # Expand leaf node and select child to rollout.
-            child_node = leaf.expand()
+            leaf.expand()
+            child_node = leaf.random_child()
 
             if child_node:
                 # Rollout
