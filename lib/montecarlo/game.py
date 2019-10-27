@@ -1,4 +1,6 @@
 """Othello game representation."""
+import copy
+
 from lib.montecarlo.util import in_bounds, other_player, increment_row_col
 
 
@@ -22,6 +24,12 @@ class Move:
 
 class GameState:
     def __init__(self, next_player, board_state):
+        """
+        Initialize the game.
+        :param next_player: int: next player to play. (i.e. This player is
+               presented with and must consider this board state.)
+        :param board_state: 2D list: Represents the board. Includes 0, 1, 2.
+        """
         self.next_player = next_player
         self.board = board_state
 
@@ -30,8 +38,8 @@ class GameState:
         Returns player who won (1 or 2) or None if winner is unknown.
         :return: int: winning player
         """
-        next_player_legal_moves = self.get_legal_moves(self.next_player)
-        other_legal_moves = self.get_legal_moves(other_player(self.next_player))
+        next_player_legal_moves = self.get_player_legal_moves(self.next_player)
+        other_legal_moves = self.get_player_legal_moves(other_player(self.next_player))
 
         # Draw
         if not next_player_legal_moves and not other_legal_moves:
@@ -47,7 +55,7 @@ class GameState:
 
     def game_over(self):
         """
-        Determine if a winner exists and the game is over.
+        Determine if the game is over.
         :return: bool
         """
         return self.game_result() is not None
@@ -61,7 +69,7 @@ class GameState:
         if not self.move_is_legal(action):
             raise Exception("Illegal move")
             return None
-        new_state = self.board.copy()
+        new_state = copy.deepcopy(self.board)
         new_state[action.row][action.col] = action.player
 
         # Checks that piece was placed by opponent
@@ -106,11 +114,24 @@ class GameState:
 
         # Checks that piece was placed by opponent
         def promising(r, c):
-            if in_bounds(r, c) and self.board[r][c] == other_player(action.player):
+            """
+            Check that piece at row r and column c was played by opponent.
+            :param r: int: Represents the row.
+            :param c: int: Represents the column.
+            :return: bool. True if piece was placed by opponent, False otherwise.
+            """
+            if in_bounds(r, c) and \
+                    self.board[r][c] == other_player(action.player):
                 return True
             return False
 
         def legal_move_in_direction(direction):
+            """
+            Check that a move is legal in a certain direction.
+            :param direction: string: Represents the direction.
+                   One of: ["N", "S", "E", "W", "NE", "NW", "SE", "SW"]
+            :return: bool: True if move is legal in given direction, False otherwise.
+            """
             row, col = increment_row_col(action.row, action.col, direction)
             if promising(row, col):
                 while promising(row, col):
@@ -149,5 +170,9 @@ class GameState:
         return valid_moves
 
     def get_legal_moves(self):
+        """
+        Get legal moves for self.next_player.
+        :return: list: Move objects
+        """
         return self.get_player_legal_moves(self.next_player)
 

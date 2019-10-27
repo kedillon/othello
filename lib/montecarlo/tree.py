@@ -2,8 +2,8 @@ from lib.montecarlo.nodes import Node
 
 
 class Tree:
-    def __init__(self, initial_state):
-        self.root = Node(initial_state)
+    def __init__(self, root_node):
+        self.root = root_node
 
     def best_move(self, num_simulations):
         """
@@ -41,9 +41,3 @@ class Tree:
             current_node = current_node.promising_child()
 
         return current_node
-
-    def simulate(self):
-        current_sim_node = self.root
-        while not current_sim_node.state.game_state.game_over():
-            possible_moves = current_sim_node.state.game_state.get_legal_moves()
-        pass

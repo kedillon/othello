@@ -21,14 +21,6 @@ class Node:
         self.visit_count = 0
         self.win_score = 0
 
-    @property
-    def fully_expanded(self):
-        """
-        Checks if node is fully expanded.
-        :return: bool.
-        """
-        return len(self.untried_moves) == 0
-
     def expand(self):
         """
         Expand a leaf node and choose a random child to rollout.
@@ -76,9 +68,10 @@ class Node:
         :param c: double: exploration parameter
         :return: Node: next node to explore/expand.
         """
+        # Add 1 to denominator to avoid division by zero
         weights = [
-            (child.win_score / child.visit_count) + c * np.sqrt(
-                np.log(self.visit_count) / child.visit_count
+            (child.win_score / (child.visit_count + 1)) + c * np.sqrt(
+                np.log(self.visit_count) / (child.visit_count + 1)
             )
             for child in self.children
         ]
