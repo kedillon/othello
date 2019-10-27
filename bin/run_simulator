@@ -6,4 +6,6 @@
 set -Eeuo pipefail
 
 # Run othello simulator
-python simulator/run.py
+while true; do
+  python simulator/run.py
+done

@@ -1,6 +1,10 @@
+import os
+import json
+
 from simulator.util import print_board
 from lib.montecarlo.tree import Tree
 from lib.montecarlo.nodes import Node
+from lib.montecarlo.util import other_player
 from lib.montecarlo.game import GameState, Move
 
 
@@ -9,15 +13,20 @@ class Player:
         self.player_num = player_num
 
     def get_move(self, board):
+        """
+        Get's the player's chosen move and a list of move visits from mcts
+        :param board:
+        :return:
+        """
         root = Node(state=board)
         mcts = Tree(root)
 
-        best_node = mcts.best_move(10)
+        best_node, all_move_visits = mcts.best_move(100)
         if best_node is None:
-            return None
+            return None, None
 
         move = best_node.transition_move
-        return [move.row, move.col]
+        return [move.row, move.col], all_move_visits
 
 
 class Simulator:
@@ -37,32 +46,74 @@ class Simulator:
         self.p2 = Player(2)
         self.turn = 1
 
+        # All game states accessed during the game.
+        self.all_game_states = []
+
     def update_board(self, row, col, player):
         move = Move(row, col, player)
         self.board = self.board.move(move)
 
+    def store_game_state(self, counts):
+        self.all_game_states.append([self.board, counts])
+
+    def store_game_result(self, result):
+        for state in self.all_game_states:
+
+            # Other player created this state, other player won
+            if other_player(state[0].next_player) == result:
+                state.append(1)
+            # This player created this state, other player won
+            elif state[0].next_player == result:
+                state.append(0)
+            else:
+                state.append(0)
+
+    def export_game_data(self, path):
+
+        game_meta = [
+            {
+                "created_by": other_player(state[0].next_player),
+                "board": state[0].board,
+                "move_visits": state[1],
+                "winloss": state[2]
+            }
+            for state in self.all_game_states
+        ]
+
+        with open(path) as infile:
+            data = json.load(infile)
+            data.extend(game_meta)
+            print(f"TRAINING SET SIZE: {len(data)}")
+
+        with open(path, 'w') as outfile:
+            json.dump(data, outfile)
+
     def play_game(self):
         while not self.board.game_over():
             if self.turn == 1:
-                move = self.p1.get_move(self.board)
+                move, all_move_visits = self.p1.get_move(self.board)
 
                 if move is None:
                     self.update_board(None, None, 1)
                     print("Player 1 has no valid moves.")
                     self.turn = 2
                 else:
+                    # Save current state
+                    self.store_game_state(all_move_visits)
                     self.update_board(move[0], move[1], 1)
                     print(f"Player 1 played at [{move[0]}, {move[1]}]")
                     print_board(self.board.board)
                     self.turn = 2
             else:
-                move = self.p2.get_move(self.board)
+                move, all_move_visits = self.p2.get_move(self.board)
 
                 if move is None:
                     self.update_board(None, None, 1)
                     print("Player 2 has no valid moves.")
                     self.turn = 1
                 else:
+                    # Save current state
+                    self.store_game_state(all_move_visits)
                     self.update_board(move[0], move[1], 2)
                     print(f"Player 2 played at [{move[0]}, {move[1]}]")
                     print_board(self.board.board)
@@ -70,6 +121,11 @@ class Simulator:
 
         result = self.board.game_result()
         print(f"Winner: Player {result}")
+
+        self.store_game_result(result)
+
+        filepath = "training.json"
+        self.export_game_data(filepath)
 
 
 if __name__ == '__main__':

@@ -29,10 +29,18 @@ class Tree:
         sorted_children = sorted(self.root.children,
                                  key=lambda child: child.visit_count,
                                  reverse=True)
-        if not sorted_children:
-            return None
 
-        return sorted_children[0]
+        # List of size 64, filled with zeros. Represents visits to moves.
+        all_move_visits = [0] * 64
+        for child in sorted_children:
+            # Sets visit_count at 1D index of move.
+            idx = child.transition_move.row * 8 + child.transition_move.col
+            all_move_visits[idx] = child.visit_count
+
+        if not sorted_children:
+            return None, None
+
+        return sorted_children[0], all_move_visits
 
     def select(self):
         """
