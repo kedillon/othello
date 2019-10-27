@@ -66,7 +66,7 @@ class Simulator:
             elif state[0].next_player == result:
                 state.append(0)
             else:
-                state.append(0)
+                state.append(0.5)
 
     def export_game_data(self, path):
 
@@ -96,6 +96,7 @@ class Simulator:
                 if move is None:
                     self.update_board(None, None, 1)
                     print("Player 1 has no valid moves.")
+                    print(f"Player 1 valid moves: {self.board.get_player_legal_moves(1)}")
                     self.turn = 2
                 else:
                     # Save current state
@@ -108,8 +109,9 @@ class Simulator:
                 move, all_move_visits = self.p2.get_move(self.board)
 
                 if move is None:
-                    self.update_board(None, None, 1)
+                    self.update_board(None, None, 2)
                     print("Player 2 has no valid moves.")
+                    print(f"Player 2 valid moves: {self.board.get_player_legal_moves(2)}")
                     self.turn = 1
                 else:
                     # Save current state

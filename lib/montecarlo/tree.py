@@ -17,7 +17,7 @@ class Tree:
 
             # Expand leaf node and select child to rollout.
             leaf.expand()
-            child_node = leaf.random_child()
+            child_node = leaf.random_child() # TODO: Choosing random child node, not new child node. Is this ok? What if we repeatedly choose child node with no legal moves
 
             if child_node:
                 # Rollout

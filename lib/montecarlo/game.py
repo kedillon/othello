@@ -41,7 +41,7 @@ class GameState:
         next_player_legal_moves = self.get_player_legal_moves(self.next_player)
         other_legal_moves = self.get_player_legal_moves(other_player(self.next_player))
 
-        # Neither player can make moves
+        # Neither player can make legal moves
         if not next_player_legal_moves and not other_legal_moves:
             total_next = sum(row.count(self.next_player) for row in self.board)
             total_other = sum(row.count(other_player(self.next_player)) for row in self.board)
@@ -52,6 +52,7 @@ class GameState:
                 return other_player(self.next_player)
             else:
                 return 0
+        # Players can still make legal moves
         return None
 
     def game_over(self):
