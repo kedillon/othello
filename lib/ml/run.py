@@ -68,7 +68,7 @@ def train(traning_batches, model_filename=None):
 
         epoch += 1
         if epoch % 10 == 0:
-            filename = f"saved_othello_model.{epoch}"
+            filename = "saved_othello_model.{}".format(epoch)
             torch.save(model.state_dict(), filename)
             print("saved %s" % filename)
 

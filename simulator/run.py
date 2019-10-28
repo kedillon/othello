@@ -92,7 +92,7 @@ class Simulator:
             with open(path) as infile:
                 data = json.load(infile)
                 data.extend(game_meta)
-                print(f"TRAINING SET SIZE: {len(data)}")
+                print("TRAINING SET SIZE: {}".format(len(data)))
 
             with open(path, 'w') as outfile:
                 json.dump(data, outfile)
@@ -113,7 +113,7 @@ class Simulator:
                     # Save current state
                     self.store_game_state(all_move_visits)
                     self.update_board(move[0], move[1], 1)
-                    print(f"Player 1 played at [{move[0]}, {move[1]}]")
+                    print("Player 1 played at [{}, {}]".format(move[0], move[1]))
                     print_board(self.board.board)
                     self.turn = 2
             else:
@@ -127,18 +127,18 @@ class Simulator:
                     # Save current state
                     self.store_game_state(all_move_visits)
                     self.update_board(move[0], move[1], 2)
-                    print(f"Player 2 played at [{move[0]}, {move[1]}]")
+                    print("Player 2 played at [{}, {}]".format(move[0], move[1]))
                     print_board(self.board.board)
                     self.turn = 1
 
         result = self.board.game_result()
-        print(f"Winner: Player {result}")
+        print("Winner: Player {}".format(result))
         return result
 
 
 if __name__ == '__main__':
     timestamp = time.time()
-    filename = f"training{timestamp}.json"
+    filename = "training{}.json".format(timestamp)
     path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "lib", "ml", "training",
