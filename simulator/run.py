@@ -1,6 +1,8 @@
 import os
 import json
+import time
 
+from lib.ml.run import load_model
 from simulator.util import print_board
 from lib.montecarlo.tree import Tree
 from lib.montecarlo.nodes import Node
@@ -9,8 +11,14 @@ from lib.montecarlo.game import GameState, Move
 
 
 class Player:
-    def __init__(self, player_num):
+    def __init__(self, player_num, model_filename=None):
         self.player_num = player_num
+
+        # Load model
+        if model_filename is None:
+            self.model = None
+        else:
+            self.model = load_model(model_filename)
 
     def get_move(self, board):
         """
@@ -21,7 +29,7 @@ class Player:
         root = Node(state=board)
         mcts = Tree(root)
 
-        best_node, all_move_visits = mcts.best_move(100)
+        best_node, all_move_visits = mcts.best_move(100, self.model)
         if best_node is None:
             return None, None
 
@@ -42,8 +50,8 @@ class Simulator:
             [0, 0, 0, 0, 0, 0, 0, 0]
         ]
         self.board = GameState(1, initial_board)
-        self.p1 = Player(1)
-        self.p2 = Player(2)
+        self.p1 = Player(1, "saved_othello_model.50")
+        self.p2 = Player(2, "saved_othello_model.50")
         self.turn = 1
 
         # All game states accessed during the game.
@@ -80,13 +88,17 @@ class Simulator:
             for state in self.all_game_states
         ]
 
-        with open(path) as infile:
-            data = json.load(infile)
-            data.extend(game_meta)
-            print(f"TRAINING SET SIZE: {len(data)}")
+        try:
+            with open(path) as infile:
+                data = json.load(infile)
+                data.extend(game_meta)
+                print(f"TRAINING SET SIZE: {len(data)}")
 
-        with open(path, 'w') as outfile:
-            json.dump(data, outfile)
+            with open(path, 'w') as outfile:
+                json.dump(data, outfile)
+        except:
+            with open(path, 'w+') as outfile:
+                json.dump(game_meta, outfile)
 
     def play_game(self):
         while not self.board.game_over():
@@ -96,7 +108,6 @@ class Simulator:
                 if move is None:
                     self.update_board(None, None, 1)
                     print("Player 1 has no valid moves.")
-                    print(f"Player 1 valid moves: {self.board.get_player_legal_moves(1)}")
                     self.turn = 2
                 else:
                     # Save current state
@@ -111,7 +122,6 @@ class Simulator:
                 if move is None:
                     self.update_board(None, None, 2)
                     print("Player 2 has no valid moves.")
-                    print(f"Player 2 valid moves: {self.board.get_player_legal_moves(2)}")
                     self.turn = 1
                 else:
                     # Save current state
@@ -123,13 +133,19 @@ class Simulator:
 
         result = self.board.game_result()
         print(f"Winner: Player {result}")
-
-        self.store_game_result(result)
-
-        filepath = "training.json"
-        self.export_game_data(filepath)
+        return result
 
 
 if __name__ == '__main__':
-    sim = Simulator()
-    sim.play_game()
+    timestamp = time.time()
+    filename = f"training{timestamp}.json"
+    path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "lib", "ml", "training",
+        filename)
+
+    for _ in range(0, 20):
+        sim = Simulator()
+        result = sim.play_game()
+        sim.store_game_result(result)
+        sim.export_game_data(path)

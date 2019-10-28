@@ -3,10 +3,11 @@ import random
 import numpy as np
 from lib.montecarlo.game import Move
 from lib.montecarlo.util import other_player
+from lib.ml.run import evaluate_model_at_gamestate
 
 
 class Node:
-    def __init__(self, state, parent=None, transition_move=None):
+    def __init__(self, state, prior=0, parent=None, transition_move=None):
         """
         Initialize the node.
         :param state: NodeState object. Represents the state of the node.
@@ -21,9 +22,29 @@ class Node:
         self.transition_move = transition_move
         self.visit_count = 0
         self.win_score = 0
+        self.prior = prior
 
-    def expand(self):
+    def expand(self, model):
         """Expand a leaf node and attach children."""
+        if self.children:
+            raise Exception("Cannot expand an expanded node.")
+
+        # Evaluate the board at this state using ml model
+        value, policy = evaluate_model_at_gamestate(self.state, model)
+
+        for move in self.state.get_legal_moves():
+            # Create a child node with updated state after move was made,
+            # valid parent, and transition move
+            child = Node(self.state.move(move),
+                         parent=self,
+                         transition_move=move,
+                         prior=policy[move.row][move.col])
+            self.children.append(child)
+
+        # Returns value to backpropagate up the tree
+        return value
+
+    def expand_mcst(self):
         if self.children:
             raise Exception("Cannot expand an expanded node.")
 
@@ -74,13 +95,10 @@ class Node:
         """
         # Add 1 to denominator to avoid division by zero
         weights = [
-            child.win_score / (child.visit_count + 1) + c * np.sqrt(
-                np.log(self.visit_count) / (child.visit_count + 1)
-            )
-            if child.visit_count > 0 else
-
-            c * np.sqrt(np.log(self.visit_count) / (child.visit_count + 1))
-
+            child.win_score / max(child.visit_count, 1) + \
+            c * child.prior * np.sqrt(
+                self.visit_count
+            ) / (child.visit_count + 1)
             for child in self.children
         ]
         return self.children[np.argmax(weights)]

@@ -55,6 +55,6 @@ class OthelloModel(nn.Module):
         value = self.fc2(value)
         value = F.dropout(F.relu(value), 0.5)
         value = self.fc3(value)
-        value = torch.flatten(torch.tanh(value))
+        value = torch.flatten((torch.tanh(value) + 1) / 2)
 
         return value, policy

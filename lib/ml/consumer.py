@@ -29,11 +29,6 @@ def consume_json_training(path):
                 #   0.5: draw
                 #   0:   loss
                 winloss = example["winloss"]
-                # Transform winloss value to -1, 0, 1
-                if winloss == 0:
-                    winloss = -1
-                elif winloss == 0.5:
-                    winloss = 0
 
                 # Transform full board into 2 boards of 0s and 1s
                 player1_board = np.array([

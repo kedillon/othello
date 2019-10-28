@@ -5,7 +5,7 @@ class Tree:
     def __init__(self, root_node):
         self.root = root_node
 
-    def best_move(self, num_simulations):
+    def best_move(self, num_simulations, model):
         """
         Selects the best move.
         :param num_simulations: int: the number of simulations to run
@@ -15,16 +15,20 @@ class Tree:
             # Select leaf node to run a simulation on
             leaf = self.select()
 
-            # Expand leaf node and select child to rollout.
-            leaf.expand()
-            child_node = leaf.random_child() # TODO: Choosing random child node, not new child node. Is this ok? What if we repeatedly choose child node with no legal moves
+            # use vanilla monte carlo tree search
+            if model is None:
+                leaf.expand_mcst()
+                child_node = leaf.random_child()
 
-            if child_node:
-                # Rollout
-                simulation_result = child_node.rollout()
+                if child_node:
+                    # Rollout
+                    simulation_result = child_node.rollout()
 
-                # Backpropogate
-                child_node.backpropagate(simulation_result)
+                    # Backpropogate
+                    child_node.backpropagate(simulation_result)
+            else:
+                value = leaf.expand(model)
+                leaf.backpropagate(value)
 
         sorted_children = sorted(self.root.children,
                                  key=lambda child: child.visit_count,
