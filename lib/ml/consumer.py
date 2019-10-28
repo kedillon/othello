@@ -59,7 +59,7 @@ def consume_json_training(path):
 
                 x_train.append(board_3d)
                 y_values.append(winloss)
-                y_policies.append(np.array(move_visits))
+                y_policies.append(np.array(move_visits) / np.array(move_visits).sum())
 
 
             # Stack inputs, winloss, and policies.

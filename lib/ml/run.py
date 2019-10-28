@@ -16,8 +16,8 @@ DEVICE = "cuda"
 NUM_FILTERS = 128
 NUM_BLOCKS = 6
 BATCH_SIZE = 300
-LEARNING_RATE = 0.0003
-WEIGHT_DECAY = 0.0001
+LEARNING_RATE = 0.0001
+WEIGHT_DECAY = 0.00003
 
 
 def to_tensor(x):
@@ -56,9 +56,12 @@ def train(traning_batches, model_filename=None):
             # Compute loss for value and policy. Mean squared error for value
             # prediction, kl divergence for polidy prediction.
             # note: kl_div() expects log(predictions) but actual probabilities for targets
-            loss = F.mse_loss(yhat_value, y_value) + F.kl_div(yhat_log_policy, y_policy, reduction='batchmean')
+            loss1 = F.mse_loss(yhat_value, y_value)
+            loss2 = F.kl_div(yhat_log_policy, y_policy, reduction='batchmean')
+            loss = loss1 + loss2
             if first:
-                print(loss)
+                print("mse: {:.4f} kldiv: {:.4f} total: {:.4f}".format(
+                    loss1.item(), loss2.item(), loss.item()))
                 first = False
             # Compute gradients: partial derivatives of the loss
             # with respect to all model weights.
@@ -68,7 +71,7 @@ def train(traning_batches, model_filename=None):
 
         epoch += 1
         if epoch % 10 == 0:
-            filename = "saved_othello_model.{}".format(epoch)
+            filename = os.path.join(os.path.dirname(__file__), "saved_othello_model.{}".format(epoch))
             torch.save(model.state_dict(), filename)
             print("saved %s" % filename)
 
@@ -115,10 +118,7 @@ def evaluate_model_at_gamestate(gamestate, model):
     else:
         channels = [player2_board, player1_board]
 
-    x_train = []
-    board_3d = np.stack(channels)
-    x_train.append(board_3d)
-    x_train = np.stack(x_train)
+    x_train = np.stack(channels).reshape((1, 2, 8, 8))
 
     value, policy = _evaluate(x_train, model)
     value_np = value.cpu().detach().numpy()
@@ -131,6 +131,7 @@ def load_model(filename, train=False):
     model = OthelloModel(NUM_FILTERS, NUM_BLOCKS).to(DEVICE)
 
     filename = os.path.join(os.path.dirname(__file__), filename)
+    print(filename)
     model.load_state_dict(torch.load(filename))
 
     if train:
@@ -142,9 +143,11 @@ def load_model(filename, train=False):
 
 
 def train_from_json(paths, model_filename):
+    batches = []
     for path in paths:
-        batches = consume_json_training(path)
-        train(batches, model_filename)
+        batches.extend(consume_json_training(path))
+
+    train(batches, model_filename)
 
 
 if __name__ == '__main__':
