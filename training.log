@@ -1286,3 +1286,59 @@ mse: 0.0537 kldiv: 0.0185 total: 0.0722
 mse: 0.0465 kldiv: 0.0152 total: 0.0617
 mse: 0.0538 kldiv: 0.0152 total: 0.0690
 saved lib/ml/saved_othello_model.50
+lib/ml/saved_othello_model.50
+mse: 0.0173 kldiv: 0.1925 total: 0.2099
+mse: 0.0178 kldiv: 0.1135 total: 0.1313
+mse: 0.0141 kldiv: 0.0783 total: 0.0924
+mse: 0.0110 kldiv: 0.0632 total: 0.0742
+mse: 0.0097 kldiv: 0.0522 total: 0.0619
+mse: 0.0191 kldiv: 0.0484 total: 0.0675
+mse: 0.0225 kldiv: 0.0415 total: 0.0640
+mse: 0.0148 kldiv: 0.0363 total: 0.0511
+mse: 0.0214 kldiv: 0.0343 total: 0.0557
+mse: 0.0097 kldiv: 0.0335 total: 0.0432
+saved lib/ml/saved_othello_model.10
+mse: 0.0107 kldiv: 0.0304 total: 0.0410
+mse: 0.0139 kldiv: 0.0289 total: 0.0428
+mse: 0.0090 kldiv: 0.0279 total: 0.0368
+mse: 0.0253 kldiv: 0.0262 total: 0.0515
+mse: 0.0187 kldiv: 0.0267 total: 0.0454
+mse: 0.0139 kldiv: 0.0259 total: 0.0398
+mse: 0.0157 kldiv: 0.0253 total: 0.0410
+mse: 0.0132 kldiv: 0.0257 total: 0.0388
+mse: 0.0205 kldiv: 0.0258 total: 0.0463
+mse: 0.0153 kldiv: 0.0270 total: 0.0422
+saved lib/ml/saved_othello_model.20
+mse: 0.0197 kldiv: 0.0257 total: 0.0454
+mse: 0.0160 kldiv: 0.0255 total: 0.0415
+mse: 0.0179 kldiv: 0.0241 total: 0.0420
+mse: 0.0076 kldiv: 0.0214 total: 0.0290
+mse: 0.0254 kldiv: 0.0221 total: 0.0476
+mse: 0.0181 kldiv: 0.0219 total: 0.0399
+mse: 0.0104 kldiv: 0.0214 total: 0.0318
+mse: 0.0177 kldiv: 0.0210 total: 0.0387
+mse: 0.0163 kldiv: 0.0198 total: 0.0360
+mse: 0.0144 kldiv: 0.0213 total: 0.0357
+saved lib/ml/saved_othello_model.30
+mse: 0.0161 kldiv: 0.0213 total: 0.0375
+mse: 0.0166 kldiv: 0.0194 total: 0.0360
+mse: 0.0094 kldiv: 0.0193 total: 0.0288
+mse: 0.0106 kldiv: 0.0233 total: 0.0338
+mse: 0.0298 kldiv: 0.0215 total: 0.0513
+mse: 0.0236 kldiv: 0.0216 total: 0.0452
+mse: 0.0135 kldiv: 0.0203 total: 0.0338
+mse: 0.0183 kldiv: 0.0189 total: 0.0373
+mse: 0.0142 kldiv: 0.0178 total: 0.0320
+mse: 0.0113 kldiv: 0.0174 total: 0.0287
+saved lib/ml/saved_othello_model.40
+mse: 0.0125 kldiv: 0.0180 total: 0.0305
+mse: 0.0119 kldiv: 0.0174 total: 0.0293
+mse: 0.0154 kldiv: 0.0169 total: 0.0322
+mse: 0.0123 kldiv: 0.0173 total: 0.0296
+mse: 0.0103 kldiv: 0.0178 total: 0.0281
+mse: 0.0098 kldiv: 0.0171 total: 0.0269
+mse: 0.0078 kldiv: 0.0170 total: 0.0248
+mse: 0.0203 kldiv: 0.0167 total: 0.0370
+mse: 0.0178 kldiv: 0.0166 total: 0.0344
+mse: 0.0107 kldiv: 0.0159 total: 0.0266
+saved lib/ml/saved_othello_model.50
