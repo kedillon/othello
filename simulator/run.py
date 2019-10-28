@@ -29,7 +29,7 @@ class Player:
         root = Node(state=board)
         mcts = Tree(root)
 
-        best_node, all_move_visits = mcts.best_move(300, self.model)
+        best_node, all_move_visits = mcts.best_move(700, self.model)
         if best_node is None:
             return None, None
 
@@ -50,8 +50,8 @@ class Simulator:
             [0, 0, 0, 0, 0, 0, 0, 0]
         ]
         self.board = GameState(1, initial_board)
-        self.p1 = Player(1, "saved_othello_model.50")
-        self.p2 = Player(2, "saved_othello_model.50")
+        self.p1 = Player(1, "final_model")
+        self.p2 = Player(2, "final_model")
         self.turn = 1
 
         # All game states accessed during the game.

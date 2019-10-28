@@ -40,7 +40,7 @@ if __name__ == "__main__":
     try:
         sock.connect((host, port))
 
-        this_player = Player(None, "saved_othello_model.50")
+        player1 = Player(None, "final_model")
 
         while True:
             data = sock.recv(1024)
