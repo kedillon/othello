@@ -121,8 +121,8 @@ def evaluate_model_at_gamestate(gamestate, model):
     x_train = np.stack(x_train)
 
     value, policy = _evaluate(x_train, model)
-    value_np = value.detach().numpy()
-    policy_np = policy.detach().numpy()
+    value_np = value.cpu().detach().numpy()
+    policy_np = policy.cpu().detach().numpy()
 
     return value_np[0], np.exp(policy_np.flatten().reshape(8, 8))
 
