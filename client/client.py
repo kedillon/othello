@@ -40,7 +40,7 @@ if __name__ == "__main__":
     try:
         sock.connect((host, port))
 
-        player1 = Player(None, "final_model")
+        this_player = Player(None, "final_model")
 
         while True:
             data = sock.recv(1024)
