@@ -1,11 +1,11 @@
 """
 Othello residual block component.
 
-Residual blocks allow us to skip training multiple
-layers because we can directly learn an identity function.
-We can train deeper networks with more layers. Training error stays down.
-Skip connection gives you a landscape with different scales.
-Earlier in the network = bigger, later = smaller. We can train gradient deeper in the network faster.
+Residual blocks allow us to skip training multiple layers because we can
+directly learn an identity function. We can train deeper networks with more
+layers and training error stays down. Skip connection gives you a landscape
+with different scales. Earlier in the network = bigger, later = smaller.
+We can train gradient deeper in the network faster.
 https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec
 """
 import torch.nn as nn

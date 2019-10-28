@@ -1,5 +1,4 @@
 """Consumes training data from json."""
-import os
 import json
 import numpy as np
 
@@ -7,6 +6,12 @@ BATCH_SIZE = 300
 
 
 def consume_json_training(path):
+    """
+    Consumes training data from a json file.
+    :param path: string: path to json file.
+    :return: array of batches: each batch is a multi-dimensional numpy array
+             to be used for training
+    """
     with open(path) as infile:
         data = json.load(infile)
 
@@ -19,15 +24,11 @@ def consume_json_training(path):
             y_values = []
             y_policies = []
 
-            # Add examples to batch
+            # Create a batch
             for example in data[i:(i + BATCH_SIZE)]:
                 player = example["created_by"]
                 full_board = example["board"]
                 move_visits = example["move_visits"]
-                # This comes in with format:
-                #   1:   win
-                #   0.5: draw
-                #   0:   loss
                 winloss = example["winloss"]
 
                 # Transform full board into 2 boards of 0s and 1s
@@ -51,16 +52,11 @@ def consume_json_training(path):
                 else:
                     channels = [player2_board, player1_board]
 
-                if player == 1:
-                    board_3d = np.stack(channels)
-                else:
-                    board_3d = np.stack(channels)
-
+                board_3d = np.stack(channels)
 
                 x_train.append(board_3d)
                 y_values.append(winloss)
                 y_policies.append(np.array(move_visits))
-
 
             # Stack inputs, winloss, and policies.
             # Combine into tuple, append to batches

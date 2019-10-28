@@ -11,7 +11,10 @@ from lib.ml.othello_model import OthelloModel
 from lib.ml.consumer import consume_json_training
 
 
-# Run on GPU not CPU
+# Run on GPU not CPU - uncomment this and add .to(DEVICE) to models when
+# running remotely on the ml rig with NVIDIA graphics cards. When running
+# locally, leave commented out and run with CPU. This is much slower, but
+# CUDA is not enabled locally.
 # DEVICE = "cuda"
 NUM_FILTERS = 128
 NUM_BLOCKS = 6
@@ -21,25 +24,25 @@ WEIGHT_DECAY = 0.0001
 
 
 def to_tensor(x):
-    return torch.tensor(x).to(dtype=torch.float)
+    return torch.tensor(x).to(dtype=torch.float)  # Add DEVICE here when running remotely
 
 
 def train(traning_batches, model_filename=None):
     # If we have a saved model, load the model
     if model_filename:
-        model = load_model(model_filename, train=True)
+        model = load_model(model_filename, train=True)  # Add DEVICE here when running remotely
     else:
-        model = OthelloModel(NUM_FILTERS, NUM_BLOCKS)
-
+        model = OthelloModel(NUM_FILTERS, NUM_BLOCKS)  # Add DEVICE here when running remotely
+        # Put this model in train mode
         model.train()
 
     optimizer = optim.AdamW(model.parameters(),
                             lr=LEARNING_RATE,
                             weight_decay=WEIGHT_DECAY)
 
-    # 50 passes over the training data
+    # 10 passes over the training data
     epoch = 0
-    while epoch < 50:
+    while epoch < 10:
         first = True
         for board, targets in traning_batches:
             x_input = to_tensor(board)
@@ -56,7 +59,10 @@ def train(traning_batches, model_filename=None):
             # Compute loss for value and policy. Mean squared error for value
             # prediction, kl divergence for polidy prediction.
             # note: kl_div() expects log(predictions) but actual probabilities for targets
-            loss = F.mse_loss(yhat_value, y_value) + F.kl_div(yhat_log_policy, y_policy, reduction='batchmean')
+            loss1 = F.mse_loss(yhat_value, y_value)
+            loss2 = F.kl_div(yhat_log_policy, y_policy, reduction='batchmean')
+            loss = loss1 + loss2
+            # Print the first batch so we can use it as testing-ish data.
             if first:
                 print(loss)
                 first = False
@@ -115,23 +121,20 @@ def evaluate_model_at_gamestate(gamestate, model):
     else:
         channels = [player2_board, player1_board]
 
-    x_train = []
-    board_3d = np.stack(channels)
-    x_train.append(board_3d)
-    x_train = np.stack(x_train)
+    x_train = np.stack(channels).reshape(1, 2, 8, 8)
 
-    value, policy = _evaluate(x_train, model)
-    value_np = value.detach().numpy()
-    policy_np = policy.detach().numpy()
+    value, policy = _evaluate(x_train, load_model(model))
+    value_np = value.detach().numpy()  # value.cpu().detach().numpy() when running remotely
+    policy_np = policy.detach().numpy()  # policy.cpu().detach().numpy() when running remotely
 
     return value_np[0], np.exp(policy_np.flatten().reshape(8, 8))
 
 
 def load_model(filename, train=False):
-    model = OthelloModel(NUM_FILTERS, NUM_BLOCKS)
+    model = OthelloModel(NUM_FILTERS, NUM_BLOCKS)  # Add DEVICE here when running remotely
 
     filename = os.path.join(os.path.dirname(__file__), filename)
-    model.load_state_dict(torch.load(filename))
+    model.load_state_dict(torch.load(filename, map_location="cpu"))  # Remove map_location="cpu" when running remotely.
 
     if train:
         model.train()
@@ -142,9 +145,11 @@ def load_model(filename, train=False):
 
 
 def train_from_json(paths, model_filename):
+    batches = []
     for path in paths:
-        batches = consume_json_training(path)
-        train(batches, model_filename)
+        batches.extend(consume_json_training(path))
+
+    train(batches, model_filename)
 
 
 if __name__ == '__main__':
@@ -155,4 +160,5 @@ if __name__ == '__main__':
         all_training_files, key=os.path.getctime, reverse=True
     )[0:50]
 
+    # Train the latest model (saved_othello_model.50) on training data
     train_from_json(latest_train_files, "saved_othello_model.50")

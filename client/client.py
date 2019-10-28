@@ -3,27 +3,9 @@
 import sys
 import json
 import socket
-import random
-import numpy as np
 
-from simulator.run import Player
-from lib.montecarlo.tree import Tree
-from lib.montecarlo.nodes import Node
+from simulator.player import ModelPlayer
 from lib.montecarlo.game import GameState
-
-
-# def get_move(player, board):
-#
-#     initial_game_state = GameState(player, board)
-#     root = Node(state=initial_game_state)
-#     mcts = Tree(root)
-#
-#     best_node, _ = mcts.best_move(300)
-#     if best_node is None:
-#         return None
-#
-#     move = best_node.transition_move
-#     return [move.row, move.col]
 
 
 def prepare_response(move):
@@ -40,7 +22,8 @@ if __name__ == "__main__":
     try:
         sock.connect((host, port))
 
-        this_player = Player(None, "final_model")
+        # Create ModelPlayer and model to use
+        this_player = ModelPlayer(None, "mcts_short")
 
         while True:
             data = sock.recv(1024)
@@ -52,14 +35,15 @@ if __name__ == "__main__":
             maxTurnTime = json_data['maxTurnTime']
             player = json_data['player']
 
+            # Identifies player number first time around
             if this_player.player_num is None:
                 this_player.player_num = player
 
             print(player, maxTurnTime, board)
 
             board_state = GameState(player, board)
-
             move, _ = this_player.get_move(board_state)
+
             response = prepare_response(move)
             sock.sendall(response)
     finally:

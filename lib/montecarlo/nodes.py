@@ -44,7 +44,7 @@ class Node:
         # Returns value to backpropagate up the tree
         return value
 
-    def expand_mcst(self):
+    def expand_mcts(self):
         if self.children:
             raise Exception("Cannot expand an expanded node.")
 
