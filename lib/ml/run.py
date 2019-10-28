@@ -12,7 +12,7 @@ from lib.ml.consumer import consume_json_training
 
 
 # Run on GPU not CPU
-# DEVICE = "cuda"
+DEVICE = "cuda"
 NUM_FILTERS = 128
 NUM_BLOCKS = 6
 BATCH_SIZE = 300
@@ -21,15 +21,15 @@ WEIGHT_DECAY = 0.0001
 
 
 def to_tensor(x):
-    return torch.tensor(x).to(dtype=torch.float)
+    return torch.tensor(x).to(device=DEVICE, dtype=torch.float)
 
 
 def train(traning_batches, model_filename=None):
     # If we have a saved model, load the model
     if model_filename:
-        model = load_model(model_filename, train=True)
+        model = load_model(model_filename, train=True).to(DEVICE)
     else:
-        model = OthelloModel(NUM_FILTERS, NUM_BLOCKS)
+        model = OthelloModel(NUM_FILTERS, NUM_BLOCKS).to(DEVICE)
 
         model.train()
 
@@ -128,7 +128,7 @@ def evaluate_model_at_gamestate(gamestate, model):
 
 
 def load_model(filename, train=False):
-    model = OthelloModel(NUM_FILTERS, NUM_BLOCKS)
+    model = OthelloModel(NUM_FILTERS, NUM_BLOCKS).to(DEVICE)
 
     filename = os.path.join(os.path.dirname(__file__), filename)
     model.load_state_dict(torch.load(filename))

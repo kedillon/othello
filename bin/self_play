@@ -17,4 +17,6 @@ while true; do
   # Train model on latest games
   python lib/ml/run.py
 
+  git push
+
 done
