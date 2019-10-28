@@ -29,7 +29,7 @@ class Player:
         root = Node(state=board)
         mcts = Tree(root)
 
-        best_node, all_move_visits = mcts.best_move(100, self.model)
+        best_node, all_move_visits = mcts.best_move(300, self.model)
         if best_node is None:
             return None, None
 

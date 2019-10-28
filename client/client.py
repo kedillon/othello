@@ -6,23 +6,24 @@ import socket
 import random
 import numpy as np
 
+from simulator.run import Player
 from lib.montecarlo.tree import Tree
 from lib.montecarlo.nodes import Node
 from lib.montecarlo.game import GameState
 
 
-def get_move(player, board):
-
-    initial_game_state = GameState(player, board)
-    root = Node(state=initial_game_state)
-    mcts = Tree(root)
-
-    best_node, _ = mcts.best_move(300)
-    if best_node is None:
-        return None
-
-    move = best_node.transition_move
-    return [move.row, move.col]
+# def get_move(player, board):
+#
+#     initial_game_state = GameState(player, board)
+#     root = Node(state=initial_game_state)
+#     mcts = Tree(root)
+#
+#     best_node, _ = mcts.best_move(300)
+#     if best_node is None:
+#         return None
+#
+#     move = best_node.transition_move
+#     return [move.row, move.col]
 
 
 def prepare_response(move):
@@ -38,6 +39,9 @@ if __name__ == "__main__":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         sock.connect((host, port))
+
+        this_player = Player(None, "saved_othello_model.50")
+
         while True:
             data = sock.recv(1024)
             if not data:
@@ -47,9 +51,15 @@ if __name__ == "__main__":
             board = json_data['board']
             maxTurnTime = json_data['maxTurnTime']
             player = json_data['player']
+
+            if this_player.player_num is None:
+                this_player.player_num = player
+
             print(player, maxTurnTime, board)
 
-            move = get_move(player, board)
+            board_state = GameState(player, board)
+
+            move, _ = this_player.get_move(board_state)
             response = prepare_response(move)
             sock.sendall(response)
     finally:
