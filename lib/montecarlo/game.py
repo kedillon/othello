@@ -5,17 +5,23 @@ from lib.montecarlo.util import in_bounds, other_player, increment_row_col
 
 
 class Move:
+    """
+    Represents a move. Includes position of move and player
+    who played that move
+    """
     def __init__(self, row, col, player):
         self.player = player
         self.row = row
         self.col = col
 
+    # __str__ and __repr__ used for printing and debugging moves
     def __str__(self):
         return f"Player {self.player}: [{self.row}, {self.col}]"
 
     def __repr__(self):
         return f"Player {self.player}: [{self.row}, {self.col}]"
 
+    # __eq__ used to check for move equality during testing
     def __eq__(self, other):
         return self.player == other.player and \
                self.row == other.row and \
@@ -39,9 +45,11 @@ class GameState:
         :return: int: winning player
         """
         next_player_legal_moves = self.get_player_legal_moves(self.next_player)
-        other_legal_moves = self.get_player_legal_moves(other_player(self.next_player))
+        other_legal_moves = self.get_player_legal_moves(
+            other_player(self.next_player)
+        )
 
-        # Neither player can make moves
+        # Neither player can make legal moves
         if not next_player_legal_moves and not other_legal_moves:
             total_next = sum(row.count(self.next_player) for row in self.board)
             total_other = sum(row.count(other_player(self.next_player)) for row in self.board)
@@ -52,6 +60,7 @@ class GameState:
                 return other_player(self.next_player)
             else:
                 return 0
+        # At least one player can still make a legal move
         return None
 
     def game_over(self):
@@ -68,6 +77,11 @@ class GameState:
         :return: GameState: updated game state
         """
         # If no move was made by player, copy state and switch player.
+        # TODO: In future iterations, the "pass" move should be treated as
+        #  its own kind of move. Currently, the nn ignores passes and the mcts
+        #  doesn't backpropogate a pass. This could affect the model's loss
+        #  significantly if players are passing often and this information is
+        #  not being reflected.
         if action.row is None and action.col is None:
             new_state = copy.deepcopy(self.board)
             return GameState(other_player(action.player), new_state)
@@ -80,11 +94,24 @@ class GameState:
 
         # Checks that piece was placed by opponent
         def promising(r, c):
-            if in_bounds(r, c) and self.board[r][c] == other_player(action.player):
+            """
+            Check that piece at row r and column c was played by opponent.
+            :param r: int: Represents the row.
+            :param c: int: Represents the column.
+            :return: bool. True if piece was placed by opponent, False otherwise.
+            """
+            if in_bounds(r, c) and \
+                    self.board[r][c] == other_player(action.player):
                 return True
             return False
 
         def flip_in_direction(direction):
+            """
+            Flip opponent's pieces in all valid directions.
+            :param direction: string: Represents the direction.
+                   One of: ["N", "S", "E", "W", "NE", "NW", "SE", "SW"]
+            :return: GameState: Represents the updated GameState after flips.
+            """
             row, col = increment_row_col(action.row, action.col, direction)
             if promising(row, col):
                 flips = []
@@ -162,7 +189,7 @@ class GameState:
 
     def get_player_legal_moves(self, player):
         """
-        Gets legal moves from this state.
+        Gets legal moves of a given player from this state.
         :return: list: Move objects
         """
         valid_moves = []
