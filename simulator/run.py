@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import click
 
 from simulator.util import print_board
 from lib.montecarlo.util import other_player
@@ -110,10 +111,11 @@ class Simulator:
             with open(path, 'w+') as outfile:
                 json.dump(game_meta, outfile)
 
-    def play_game(self, debug=False, train=False):
+    def play_game(self, verbose=False, train=False):
         """
         Play a game using the simulator. Players take turns, self.board updates.
-        :param debug: bool: when debug flag is True, every game state prints.
+        :param verbose: bool: when verbose flag is True, every game state prints.
+        :param train: bool: when train flag is True, game states are saved.
         :return: int, 2D list. Game result, final board state.
         """
         while not self.board.game_over():
@@ -122,7 +124,7 @@ class Simulator:
 
                 if move is None:
                     self.update_board(None, None, 1)
-                    if debug:
+                    if verbose:
                         print("Player 1 has no valid moves.")
                     self.turn = 2
                 else:
@@ -130,7 +132,7 @@ class Simulator:
                         # Save current state for training
                         self.store_game_state(all_move_visits)
                     self.update_board(move[0], move[1], 1)
-                    if debug:
+                    if verbose:
                         print("Player 1 played at [{}, {}]".format(move[0], move[1]))
                         print_board(self.board.board)
                     self.turn = 2
@@ -139,7 +141,7 @@ class Simulator:
 
                 if move is None:
                     self.update_board(None, None, 2)
-                    if debug:
+                    if verbose:
                         print("Player 2 has no valid moves.")
                     self.turn = 1
                 else:
@@ -147,7 +149,7 @@ class Simulator:
                         # Save current state for training
                         self.store_game_state(all_move_visits)
                     self.update_board(move[0], move[1], 2)
-                    if debug:
+                    if verbose:
                         print("Player 2 played at [{}, {}]".format(move[0], move[1]))
                         print_board(self.board.board)
                     self.turn = 1
@@ -157,13 +159,14 @@ class Simulator:
         return result, self.board.board
 
 
-def run_create_training_data(player1_type, player2_type):
+def run_create_training_data(player1_type, player2_type, verbose):
     """
     Play 20 games and write training data to a json file in lib/ml/training/
     :param player1_type: string: name of this player's ml model, "random",
            or None to use vanilla mcts
     :param player2_type: string: name of this player's ml model, "random",
            or None to use vanilla mcts
+    :param verbose: bool: prints more output.
     :return:
     """
     timestamp = time.time()
@@ -173,36 +176,45 @@ def run_create_training_data(player1_type, player2_type):
         "lib", "ml", "training",
         filename)
 
-    for _ in range(0,20):
+    for _ in range(0, 20):
         sim = Simulator(player1_type=player1_type, player2_type=player2_type)
-        result, _ = sim.play_game(train=True)
+        result, final_board = sim.play_game(train=True, verbose=verbose)
 
         sim.store_game_result(result)
         sim.export_game_data(path)
 
+        print("Winner: Player {}".format(result))
+        print_board(final_board)
 
-def run_single_game(player1_type, player2_type):
+
+def run_single_game(player1_type, player2_type, verbose):
     """
     Runs a single game and prints game output to stdout.
     :param player1_type: string: name of this player's ml model, "random",
            or None to use vanilla mcts
     :param player2_type: string: name of this player's ml model, "random",
            or None to use vanilla mcts
+    :param verbose: bool: prints more output.
     """
     sim = Simulator(player1_type=player1_type, player2_type=player2_type)
-    result, final_board = sim.play_game(debug=True)
+    result, final_board = sim.play_game(train=False, verbose=verbose)
     print("Winner: Player {}".format(result))
     print_board(final_board)
 
 
-# Run the simulator using specified player types.
+@click.command()
+@click.option("-v", "--verbose", is_flag=True, help="Print more output.")
+@click.option("-t", "--train", is_flag=True, help="Generate training data.")
+@click.argument("p1_type")
+@click.argument("p2_type")
+def main(verbose, train, p1_type, p2_type):
+
+    if train:
+        run_create_training_data(p1_type, p2_type, verbose)
+
+    else:
+        run_single_game(p1_type, p2_type, verbose)
+
+
 if __name__ == '__main__':
-    p1_type = "random"      # Random player
-    p2_type = "mcts_short"  # Use mcts_short model
-
-    # To generate training data, uncomment the following line.
-    # run_create_training_data(player1_type, player2_type)
-
-    # To play a single game using the simulator, uncomment the following line.
-    run_single_game(p1_type, p2_type)
-
+    main()

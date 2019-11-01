@@ -161,4 +161,4 @@ if __name__ == '__main__':
     )[0:50]
 
     # Train the latest model (saved_othello_model.50) on training data
-    train_from_json(latest_train_files, "saved_othello_model.50")
+    train_from_json(latest_train_files, "saved_othello_model.10")
