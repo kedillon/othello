@@ -10,7 +10,7 @@ Othello AI is based on Alpha Zero and uses reinforcement learning to play games 
 ## Requirements
 Othello AI requires `Python >= 3.7.3`.
 
-Othello AI should be run using Docker. Details coming soon.
+Othello AI should be run using a pytorch Docker image. Details coming soon.
 
 ## Training
 Othello AI can be trained by executing the following command:
