@@ -1,6 +1,7 @@
 """Functions to train and test the Othello model."""
 import os
 import glob
+import click
 import numpy as np
 import torch
 import torch.optim as optim
@@ -27,7 +28,7 @@ def to_tensor(x):
     return torch.tensor(x).to(dtype=torch.float)  # Add DEVICE here when running remotely
 
 
-def train(traning_batches, model_filename=None):
+def train(traning_batches, verbose, model_filename=None):
     # If we have a saved model, load the model
     if model_filename:
         model = load_model(model_filename, train=True)  # Add DEVICE here when running remotely
@@ -64,7 +65,8 @@ def train(traning_batches, model_filename=None):
             loss = loss1 + loss2
             # Print the first batch so we can use it as testing-ish data.
             if first:
-                print(loss)
+                if verbose:
+                    print(loss)
                 first = False
             # Compute gradients: partial derivatives of the loss
             # with respect to all model weights.
@@ -144,21 +146,35 @@ def load_model(filename, train=False):
     return model
 
 
-def train_from_json(paths, model_filename):
+def train_from_json(paths, model_filename, verbose):
     batches = []
     for path in paths:
         batches.extend(consume_json_training(path))
 
-    train(batches, model_filename)
+    train(batches, verbose, model_filename)
 
 
-if __name__ == '__main__':
-
+@click.command()
+@click.option("-v", "--verbose", is_flag=True, help="Print more output.")
+@click.argument("model", )
+def main(verbose, model):
     all_training_files = glob.glob(os.path.join(os.path.dirname(__file__), "training", "*"))
 
     latest_train_files = sorted(
         all_training_files, key=os.path.getctime, reverse=True
     )[0:50]
 
-    # Train the latest model (saved_othello_model.50) on training data
-    train_from_json(latest_train_files, "saved_othello_model.10")
+    if model is None:
+        cont = input("By not specifying a model, you may be overwriting an existing model. "
+                     "Would you like to continue? (yes/no) ")
+        if cont == "yes":
+            train_from_json(latest_train_files, None)
+        else:
+            return
+
+    # Train the given model
+    train_from_json(latest_train_files, model, verbose)
+
+
+if __name__ == '__main__':
+    main()
